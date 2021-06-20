@@ -1,12 +1,12 @@
 {
   "name": "ww-classroom",
   "version": "1.0.0",
-  "description": "",
+  "description": "Whatsapp bot to use Google Classroom API",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
-  "author": "",
+  "author": "Amey Bhavsar",
   "license": "ISC"
 }
