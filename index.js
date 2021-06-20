@@ -1,7 +1,7 @@
 const fs = require('fs');
 const readline = require('readline');
 const {google} = require('googleapis');
-
+const bot = require('bot-commander');
 // If modifying these scopes, delete token.json.
 const SCOPES = ['https://www.googleapis.com/auth/classroom.courses.readonly'];
 // The file token.json stores the user's access and refresh tokens, and is
@@ -66,41 +66,51 @@ function getNewToken(oAuth2Client, callback) {
   });
 }
 
-/**
- * Lists the first 10 courses the user has access to.
- *
- * @param {google.auth.OAuth2} auth An authorized OAuth2 client.
- */
-const replyMessage = (message, reply) => {
-	console.log(reply);
-}
-const parseMessage = async (classroom, message) => {
-	console.log(message);
-	if (message == "courselist") {
-	  classroom.courses.list({pageSize: 10}, (err, res) => {
-	  if (err) return console.error('The API returned an error: ' + err);
-	  const courses = res.data.courses;
-	  let reply = "";
-	  if (courses && courses.length) {
-	    reply += "Courses:\n";
-	    courses.forEach((course) => {
-	      reply += course.name + '\n';
-	    });
-	  } else {
-	    reply = 'No courses found.';
-	  }
-	  replyMessage(message, reply);
-      });
+// only listen to messages starting with given prefix
+bot.prefix('!c');
+bot
+  .command('list')
+  .action(meta => {
+  	meta.classroom.courses.list({pageSize: 10}, (err, res) => {
+  	let replyMessage = "";
+  	if (err) replyMessage = 'The API returned an error. ' + err;
+  	else {
+		const courses = res.data.courses;
+		if (courses && courses.length) {
+		 replyMessage += "Courses:\n";
+		 courses.forEach((course) => {
+		   replyMessage += course.name + '\n';
+		 });
+		} else {
+		 replyMessage = 'No courses found.';
+		}
 	}
-}
+	meta.reply(replyMessage);
+	});
+  });
+bot
+  .command('help')
+  .action(meta => {
+  	console.log(bot.help());
+  })
 function listenMessages(auth) {
   const classroom = google.classroom({version: 'v1', auth});
   const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout,
-   });
+  });
   rl.question('> ', (message) => {
   	rl.close();
-  	parseMessage(classroom, message);
+  	// when a new message arrives, check if bot should reply to it
+  	// if yes, parse it and return reply
+  	const data = {
+  	  name: "Amey",
+  	  reply: msg => {
+  	  	console.log(msg);
+  	  },
+  	  classroom
+  	}
+  	bot.parse(message, data);
+  	// parseMessage(classroom, message);
   });
 }
