@@ -1,7 +1,14 @@
 const bot = require('bot-commander');
 // only listen to messages starting with given prefix
 bot.prefix('!c');
-bot.command('list').action((meta) => {
+bot.action( meta => {
+  meta.msg.reply('Invalid command.\n' + bot.help());
+});
+bot
+  .command('list')
+  .alias('courselist')
+  .description('Returns list of all courses in Classroom.')
+  .action((meta) => {
   meta.classroom.courses.list({ pageSize: 10 }, (err, res) => {
     let replyMessage = '';
     if (err) replyMessage = 'The API returned an error. ' + err;
@@ -16,11 +23,11 @@ bot.command('list').action((meta) => {
         replyMessage = 'No courses found.';
       }
     }
-    meta.reply(replyMessage);
+    meta.msg.reply(replyMessage + '—🤖 classroom bot');
   });
 });
 bot.command('help').action((meta) => {
-  console.log(bot.help());
+  meta.msg.reply(bot.help());
 });
 module.exports = {
   bot,
