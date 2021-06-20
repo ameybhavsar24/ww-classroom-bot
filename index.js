@@ -13,7 +13,7 @@ const TOKEN_PATH = 'token.json';
 fs.readFile('credentials.json', (err, content) => {
   if (err) return console.log('Error loading client secret file:', err);
   // Authorize a client with credentials, then call the Google Classroom API.
-  authorize(JSON.parse(content), listCourses);
+  authorize(JSON.parse(content), listenMessages);
 });
 
 /**
@@ -71,20 +71,36 @@ function getNewToken(oAuth2Client, callback) {
  *
  * @param {google.auth.OAuth2} auth An authorized OAuth2 client.
  */
-function listCourses(auth) {
-  const classroom = google.classroom({version: 'v1', auth});
-  classroom.courses.list({
-    pageSize: 10,
-  }, (err, res) => {
-    if (err) return console.error('The API returned an error: ' + err);
-    const courses = res.data.courses;
-    if (courses && courses.length) {
-      console.log('Courses:');
-      courses.forEach((course) => {
-        console.log(`${course.name} (${course.id})`);
+const replyMessage = (message, reply) => {
+	console.log(reply);
+}
+const parseMessage = async (classroom, message) => {
+	console.log(message);
+	if (message == "courselist") {
+	  classroom.courses.list({pageSize: 10}, (err, res) => {
+	  if (err) return console.error('The API returned an error: ' + err);
+	  const courses = res.data.courses;
+	  let reply = "";
+	  if (courses && courses.length) {
+	    reply += "Courses:\n";
+	    courses.forEach((course) => {
+	      reply += course.name + '\n';
+	    });
+	  } else {
+	    reply = 'No courses found.';
+	  }
+	  replyMessage(message, reply);
       });
-    } else {
-      console.log('No courses found.');
-    }
+	}
+}
+function listenMessages(auth) {
+  const classroom = google.classroom({version: 'v1', auth});
+  const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout,
+   });
+  rl.question('> ', (message) => {
+  	rl.close();
+  	parseMessage(classroom, message);
   });
 }
