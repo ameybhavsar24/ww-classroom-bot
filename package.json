@@ -4,9 +4,12 @@
   "description": "Whatsapp bot to use Google Classroom API",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node ."
   },
   "keywords": [],
   "author": "Amey Bhavsar",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "googleapis": "^39.2.0"
+  }
 }
